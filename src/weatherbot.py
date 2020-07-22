@@ -2,6 +2,7 @@
 import re
 
 import aiohttp
+import bcrypt
 
 from starlette.applications import Starlette
 from starlette.routing import Route
@@ -9,8 +10,9 @@ from starlette.routing import Route
 from starlette.responses import JSONResponse
 from starlette.background import BackgroundTask
 
-from secret import TG_API_TOKEN
+from aiotelegram import gram
 from sendmail import  send_confirmation_mail, confirm_token
+from secret import TG_API_TOKEN, BASE_URL
 
 
 users = {}
@@ -21,17 +23,20 @@ class User:
     def __init__(self, email, password=None, city=None):
         self.email      = email
         self._password  = password
+        self.salt       = None
         self.city       = city
 
     @property
     def password(self):
-        return self.password
+        return self._password
 
     @password.setter
-    def password(self, value):
-        # TODO: encrypted_pwd
-        encrypted_pwd = 'encrypted_pwd'
-        self._password = encrypted_pwd
+    def password(self, password):
+        self.salt = bcrypt.gensalt()
+        self._password = bcrypt.hashpw(password.encode(), self.salt)
+
+    def __str__(self):
+        return f'email:{self.email}, pwd:{self._password}, salt:{self.salt}, city:{self.city}'
 
 
 async def make_request(url, data):
@@ -56,6 +61,7 @@ async def process_city(chat_id, city):
         
         await send_confirmation_mail(user.email, chat_id)
         await send_message(chat_id, 'На почту выслано письмо для активации вашего почтового адреса. После подтверждения вы сможете войти в личный кабинет.')
+        print(user)
     else:
         await send_message(chat_id, 'Некорректный город. Введите заново.')
         steps[chat_id] = process_city
@@ -138,4 +144,7 @@ routes = [
 ]
 
 
-app = Starlette(routes=routes)
+gram.remove_webhook(BASE_URL, TG_API_TOKEN)
+gram.set_webhook(BASE_URL, TG_API_TOKEN)
+
+app = Starlette(routes=routes)  

@@ -60,7 +60,6 @@ async def _generate_confirmation_token(email, chat_id):
 
 async def send_confirmation_mail(email, chat_id):
     token = await _generate_confirmation_token(email, chat_id)
-    print('TOKEN: ', token)
     activation_url = f'{BASE_URL}/confirm/{token}'
     message = await _create_msg(activation_url, email)
 
