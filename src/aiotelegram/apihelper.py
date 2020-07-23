@@ -10,7 +10,7 @@ from .types import JsonDeserializable
 API_URL = 'https://api.telegram.org/bot{token}/{method_name}'
 
 
-# TODO: need to cache request session.
+# TODO: need to save client session in var.
     
 
 async def _make_request(token, method_name, method='get', params=None):
