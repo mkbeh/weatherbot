@@ -10,6 +10,17 @@ from src.aiotelegram import types as bot_types
 from src.secret import BASE_URL
 
 
+async def send_email_confirmation_success_msg(email, chat_id):
+    await bot.send_message(chat_id, f'Email {email} успешно подтвержден.')
+
+    markup = bot_types.ReplyKeyboardMarkup()
+    buttons = [bot_types.KeyboardButton(text) for text in ('Погода сегодня', 'Погода на неделю', 'Выйти')]
+    await markup.add(*buttons)
+
+    await bot.send_message(chat_id, 'Доступ в личный кабинет теперь открыт.', markup)
+    next_step_handler[chat_id] = steps.personal_area_process
+
+
 async def email_confirmation(request):
     token = request.path_params['token']
     try:
@@ -18,19 +29,12 @@ async def email_confirmation(request):
         # NOTE: need to send error to user into Telegram.
         return JSONResponse({'ok': False})
     else:
+        user = users[int(chat_id)]
+        user.is_active = user.is_login = True
+
         # TODO: next step: write user data to db 
 
-        await bot.send_message(chat_id, f'Email {email} успешно подтвержден.')
-
-        markup = bot_types.ReplyKeyboardMarkup()
-        buttons = [bot_types.KeyboardButton(text) for text in ('Погода сегодня', 'Погода на неделю', 'Выйти')]
-        await markup.add(*buttons)
-
-        await bot.send_message(chat_id, 'Доступ в личный кабинет теперь открыт.', markup)
-        next_step_handler[chat_id] = steps.personal_area_process
-
-        user = users[int(chat_id)]
-        user.is_login = True
+        await send_email_confirmation_success_msg(email, chat_id)
 
         return JSONResponse({'status': 'Активация почты прошла успешно'})
 
