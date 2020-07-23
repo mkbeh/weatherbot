@@ -1,19 +1,13 @@
 # -*- coding: utf-8 -*-
-import re
-
-import aiohttp
-import bcrypt
-
 from starlette.applications import Starlette
 from starlette.routing import Route
 
 from starlette.responses import JSONResponse
-from starlette.background import BackgroundTask
 
 from src import users, steps, next_step_handler, bot
 from src import sendmail
 from src.aiotelegram import types as bot_types
-from src.secret import TG_API_TOKEN, BASE_URL
+from src.secret import BASE_URL
 
 
 async def email_confirmation(request):
