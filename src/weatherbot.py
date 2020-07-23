@@ -10,13 +10,15 @@ from starlette.routing import Route
 from starlette.responses import JSONResponse
 from starlette.background import BackgroundTask
 
-from aiotelegram import gram
+from aiotelegram import GramBot, types 
 from sendmail import  send_confirmation_mail, confirm_token
 from secret import TG_API_TOKEN, BASE_URL
 
 
 users = {}
 steps = {}
+
+bot = GramBot(TG_API_TOKEN)
 
 
 class User:
@@ -25,6 +27,7 @@ class User:
         self._password  = password
         self.salt       = None
         self.city       = city
+        self.is_login   = False
 
     @property
     def password(self):
@@ -39,19 +42,6 @@ class User:
         return f'email:{self.email}, pwd:{self._password}, salt:{self.salt}, city:{self.city}'
 
 
-async def make_request(url, data):
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, data=data) as resp:
-            pass
-
-
-async def send_message(chat_id, text):
-    method = "sendMessage"
-    url = f"https://api.telegram.org/bot{TG_API_TOKEN}/{method}"
-    data = {"chat_id": chat_id, "text": text}
-    await make_request(url, data)
-
-
 async def process_city(chat_id, city):
     # TODO: validate city.
     
@@ -60,10 +50,9 @@ async def process_city(chat_id, city):
         user.city = city
         
         await send_confirmation_mail(user.email, chat_id)
-        await send_message(chat_id, 'На почту выслано письмо для активации вашего почтового адреса. После подтверждения вы сможете войти в личный кабинет.')
-        print(user)
+        await bot.send_message(chat_id, 'На почту выслано письмо для активации вашего почтового адреса. После подтверждения вы сможете войти в личный кабинет.')
     else:
-        await send_message(chat_id, 'Некорректный город. Введите заново.')
+        await bot.send_message(chat_id, 'Некорректный город. Введите заново.')
         steps[chat_id] = process_city
 
 
@@ -73,9 +62,9 @@ async def process_password(chat_id, password):
         user.password = password
 
         steps[chat_id] = process_city
-        await send_message(chat_id, 'Введите город.')
+        await bot.send_message(chat_id, 'Введите город.')
     else:
-        await send_message(chat_id, 'Некорректный пароль. Введите заново.')
+        await bot.send_message(chat_id, 'Некорректный пароль. Введите заново.')
         steps[chat_id] = process_password
 
 
@@ -84,19 +73,19 @@ async def process_email(chat_id, email):
     if re.match(email_pattern, email):
         users[chat_id] = User(email)
         steps[chat_id] = process_password
-        await send_message(chat_id, 'Введите пароль. (Длина пароля должна быть от 6 до 10 символов)')
+        await bot.send_message(chat_id, 'Введите пароль. (Длина пароля должна быть от 6 до 10 символов)')
     else:
-        await send_message(chat_id, 'Некорректный email. Введите заново.')
+        await bot.send_message(chat_id, 'Некорректный email. Введите заново.')
         steps[chat_id] = process_email
 
 
 async def start(chat_id, message):
-    await send_message(chat_id, 'Здравствуйте, зарегистрируйтесь и узнавайте погоду в вашем городе.')
-    await send_message(chat_id, 'Введите email')
+    await bot.send_message(chat_id, 'Здравствуйте, зарегистрируйтесь и узнавайте погоду в вашем городе.')
+    await bot.send_message(chat_id, 'Введите email')
     steps[chat_id] = process_email
 
 
-async def login_process(chat_id, message):
+async def personal_area_process(chat_id, message):
     pass
 
 
@@ -109,12 +98,19 @@ async def email_confirmation(request):
         #       to send error message to user in Telegram.
         return JSONResponse({'ok': False})
     else:
-        # TODO: return success status 
         # TODO: next step: write user data to db 
 
-        await send_message(chat_id, f'Email {email} успешно подтвержден.')
-        await send_message(chat_id, 'Введите ваши логин и пароль через двоеточие (Пример: user:password')
-        steps[chat_id] = login_process
+        await bot.send_message(chat_id, f'Email {email} успешно подтвержден.')
+
+        markup = types.ReplyKeyboardMarkup()
+        buttons = [types.KeyboardButton(text) for text in ('Погода сегодня', 'Погода на неделю', 'Выйти')]
+        await markup.add(*buttons)
+
+        await bot.send_message(chat_id, 'Доступ в личный кабинет теперь открыт.', markup)
+        steps[chat_id] = personal_area_process
+
+        user = users[chat_id]
+        user.is_login = True
 
         return JSONResponse({'status': 'Активация почты прошла успешно'})
 
@@ -144,7 +140,7 @@ routes = [
 ]
 
 
-gram.remove_webhook(BASE_URL, TG_API_TOKEN)
-gram.set_webhook(BASE_URL, TG_API_TOKEN)
+bot.delete_webhook()
+bot.set_webhook(BASE_URL)
 
 app = Starlette(routes=routes)  
