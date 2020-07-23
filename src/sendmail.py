@@ -10,7 +10,7 @@ from secret import MAIL_USERNAME, MAIL_PASSWORD, SECRET_KEY, SECURITY_PASSWORD_S
 
 
 HTML_MSG = """
-<p>Welcome! Thanks for signing up. Please follow this link to activate your account:</p>
+<p>Здравствуйте! Благодарим Вас за регистрацию. Пожалуйста пройдите по следующей ссылке , чтобы активировать ваш акканут:</p>
 <p><a href="{0}">{1}</a></p>
 <br>
 <p>Cheers!</p>

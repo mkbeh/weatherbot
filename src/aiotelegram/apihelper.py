@@ -8,6 +8,14 @@ from .types import JsonDeserializable
 
 
 API_URL = 'https://api.telegram.org/bot{token}/{method_name}'
+    
+
+async def _make_request(token, method_name, method='get', params=None):
+    request_url = API_URL.format(token=token, method_name=method_name)
+
+    async with aiohttp.ClientSession() as session:
+        async with session.post(request_url, data=params) as resp:
+           pass
 
 
 def set_webhook(token, url):
@@ -19,14 +27,6 @@ def set_webhook(token, url):
 def delete_webhook(token):
     method_url = 'deleteWebhook'
     asyncio.ensure_future(_make_request(token, method_url))
-    
-
-async def _make_request(token, method_name, method='get', params=None):
-    request_url = API_URL.format(token=token, method_name=method_name)
-
-    async with aiohttp.ClientSession() as session:
-        async with session.post(request_url, data=params) as resp:
-            print(await resp.text())
 
 
 async def send_message(token, chat_id, text, 
