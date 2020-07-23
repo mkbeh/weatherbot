@@ -27,7 +27,7 @@ async def email_confirmation(request):
         email, chat_id = await sendmail.confirm_token(token)
     except:
         # NOTE: need to send error to user into Telegram.
-        return JSONResponse({'ok': False})
+        return JSONResponse({'status': 'Ошибка активации.'})
     else:
         user = users[int(chat_id)]
         user.is_active = user.is_login = True
