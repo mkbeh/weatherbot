@@ -3,6 +3,11 @@ import re
 
 from src import users, next_step_handler, bot, User
 from src import sendmail
+from src.aiotelegram import types as bot_types
+
+
+async def personal_area_process(chat_id, message):
+    pass
 
 
 async def process_city(chat_id, city):
@@ -43,11 +48,7 @@ async def process_email(chat_id, email):
 
 
 async def start(chat_id, message):
-    await bot.send_message(chat_id, 'Здравствуйте, зарегистрируйтесь и узнавайте погоду в вашем городе.')
+    markup = bot_types.ReplyKeyboardRemove()
+    await bot.send_message(chat_id, 'Здравствуйте, зарегистрируйтесь и узнавайте погоду в вашем городе.', reply_markup=markup)
     await bot.send_message(chat_id, 'Введите email')
     next_step_handler[chat_id] = process_email
-
-
-async def personal_area_process(chat_id, message):
-    pass
-

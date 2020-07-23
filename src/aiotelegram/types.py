@@ -19,6 +19,16 @@ class JsonDeserializable(metaclass=ABCMeta):
         pass
 
 
+class ReplyKeyboardRemove(JsonDeserializable):
+    def __init__(self):
+        pass
+
+    async def to_json(self):
+        return json.dumps(
+            {'remove_keyboard': True}
+        )
+
+
 class ReplyKeyboardMarkup(JsonDeserializable):
     def __init__(self):
         self.keyboard = []
