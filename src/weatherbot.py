@@ -21,8 +21,7 @@ async def email_confirmation(request):
     try:
         email, chat_id = await sendmail.confirm_token(token)
     except:
-        # NOTE: need to store chat_id of user temporary in key-value storage
-        #       to send error message to user in Telegram.
+        # NOTE: need to send error to user into Telegram.
         return JSONResponse({'ok': False})
     else:
         # TODO: next step: write user data to db 
