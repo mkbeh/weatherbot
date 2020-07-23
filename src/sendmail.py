@@ -71,4 +71,3 @@ async def send_confirmation_mail(email, chat_id):
         password=MAIL_PASSWORD,
         use_tls=True,
     )
-
