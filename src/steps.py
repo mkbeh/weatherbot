@@ -52,7 +52,7 @@ async def process_city(chat_id, city):
     
     if city:
         user = users[chat_id]
-        user.city = city
+        user.city = city.capitalize()
         
         await sendmail.send_confirmation_mail(user.email, chat_id)
         await bot.send_message(chat_id, 'На почту выслано письмо для активации вашего почтового адреса. После подтверждения вы сможете войти в личный кабинет.')
