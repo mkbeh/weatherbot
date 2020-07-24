@@ -46,6 +46,13 @@ async def send_message(token, chat_id, text,
     await _make_request(token, method_url, method='post', params=payload)
 
 
+async def send_notification(token, chat_id, text, 
+                            reply_markup=None):
+    method_url = 'sendMessage'
+    payload = {'chat_id': chat_id, 'text': text}
+    await _make_request(token, method_url, params=payload)
+
+
 async def _convert_markup(markup):
     if isinstance(markup, JsonDeserializable):
         return await markup.to_json()

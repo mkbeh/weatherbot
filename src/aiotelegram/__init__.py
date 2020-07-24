@@ -8,6 +8,7 @@ class GramBot:
     
     Methods:
         sendMessage
+        sendNotification
 
         set_webhook
         delete_webhook
@@ -24,3 +25,6 @@ class GramBot:
 
     async def send_message(self, chat_id, text, reply_markup=None):
         await apihelper.send_message(self.token, chat_id, text, reply_markup)
+
+    async def send_notification(self, chat_id, text, reply_markup=None):
+        await apihelper.send_notification(self.token, chat_id, text, reply_markup)

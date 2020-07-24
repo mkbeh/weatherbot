@@ -10,9 +10,12 @@ from uvicorn.main import run
 
 from src import users, next_step_handler, bot
 from src import sendmail, steps
+from src.messages import *
 from src.models import common
 from src.aiotelegram import types as bot_types
 from src.secret import BASE_URL, DB_URL
+
+from starlette.background import BackgroundTask
 
 
 app = Starlette()
@@ -20,10 +23,6 @@ app = Starlette()
 register_tortoise(app, db_url=DB_URL, modules={"models": ["src.models"]}, generate_schemas=True)
 
 bot.set_webhook(BASE_URL)
-
-
-# debug
-next_step_handler[1056933978] = steps.personal_area_handler
 
 
 async def send_email_confirmation_success_msg(email, chat_id):
