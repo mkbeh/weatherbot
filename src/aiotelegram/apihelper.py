@@ -24,12 +24,16 @@ async def _make_request(token, method_name, method='get', params=None):
 def set_webhook(token, url):
     method_url = 'setWebhook'
     payload = {'url': url}
-    asyncio.ensure_future(_make_request(token, method_url, method='post', params=payload))
+    asyncio.ensure_future(
+        _make_request(token, method_url, method='post', params=payload)
+    )
 
 
 def delete_webhook(token):
     method_url = 'deleteWebhook'
-    asyncio.ensure_future(_make_request(token, method_url))
+    asyncio.ensure_future(
+        _make_request(token, method_url)
+    )
 
 
 async def send_message(token, chat_id, text, 
