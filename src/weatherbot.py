@@ -10,6 +10,7 @@ from uvicorn.main import run
 
 from src import users, next_step_handler, bot
 from src import sendmail, steps
+from src.models import common
 from src.aiotelegram import types as bot_types
 from src.secret import BASE_URL, DB_URL
 
@@ -18,14 +19,17 @@ app = Starlette()
 
 register_tortoise(app, db_url=DB_URL, modules={"models": ["src.models"]}, generate_schemas=True)
 
-bot.delete_webhook()
 bot.set_webhook(BASE_URL)
+
+
+# debug
+next_step_handler[1056933978] = steps.personal_area_handler
 
 
 async def send_email_confirmation_success_msg(email, chat_id):
     await bot.send_message(chat_id, f'Email {email} успешно подтвержден.')
     await bot.send_message(chat_id, 'Для того , чтобы войти в личный кабинет введите email и пароль через двоеточие (Пример: email:password')
-    next_step_handler[chat_id] = steps.login
+    next_step_handler[chat_id] = steps.process_login
 
 
 @app.route('/confirm/{token}')
@@ -39,9 +43,7 @@ async def email_confirmation(request):
         return JSONResponse({'ok': 'Ошибка активации.'})
     else:
         user = users[chat_id]
-        user.is_active = True
-        await user.save()    
-    
+        await common.save_data(user, 'is_active', True)  
         await send_email_confirmation_success_msg(email, chat_id)
 
         return JSONResponse({'ok': 'Активация почты прошла успешно'})
