@@ -85,7 +85,14 @@ async def process_email(chat_id, email):
 
 
 async def start(chat_id, message):
+    user = await common.get_user(chat_id)
     markup = bot_types.ReplyKeyboardRemove()
-    await bot.send_message(chat_id, 'Здравствуйте, зарегистрируйтесь и узнавайте погоду в вашем городе.', reply_markup=markup)
-    await bot.send_message(chat_id, 'Введите email')
-    next_step_handler[chat_id] = process_email
+
+    if user:
+        await bot.send_message(chat_id, 'Вы уже регистрировались ранее.')
+        await bot.send_message(chat_id, 'Введите ваш email и пароль через двоеточие. (Пример: email:password', reply_markup=markup)
+        next_step_handler[chat_id] = process_login
+    else:
+        await bot.send_message(chat_id, 'Здравствуйте, зарегистрируйтесь и узнавайте погоду в вашем городе.', reply_markup=markup)
+        await bot.send_message(chat_id, 'Введите email')
+        next_step_handler[chat_id] = process_email
