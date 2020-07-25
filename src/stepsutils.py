@@ -29,7 +29,7 @@ async def _make_request(url):
            return await resp.json()
 
 
-async def get_weather_today(city):
+async def _get_weather_today(city):
     url = f'http://api.openweathermap.org/data/2.5/weather?q={city}&appid={OPENWEATHER_API_TOKEN}'
 
     json_data = await _make_request(url)
@@ -44,7 +44,7 @@ async def get_weather_data(city):
     if weather:
         weather_data = weather[0]
     else:
-        weather_data = await get_weather_today(city)
+        weather_data = await _get_weather_today(city)
         await common.create_weather(city=city, **weather_data)
 
     return weather_data
