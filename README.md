@@ -1,4 +1,4 @@
-# Simple asynchronous "Weather telegram bot".
+# Simple asynchronous "Weather telegram bot"
 
 
 **Supports actions:**
