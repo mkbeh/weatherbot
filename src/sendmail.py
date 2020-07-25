@@ -6,7 +6,7 @@ from email.mime.text import MIMEText
 
 from itsdangerous import URLSafeTimedSerializer
 
-from secret import MAIL_USERNAME, MAIL_PASSWORD, SECRET_KEY, SECURITY_PASSWORD_SALT, BASE_URL
+from src import GMAIL_USER, GMAIL_PWD, SECRET_KEY, PWD_SALT, NGROK_URL
 
 
 HTML_MSG = """
@@ -32,7 +32,7 @@ async def confirm_token(token, expiration=3600):
     try:
         data = serializer.loads(
             token,
-            salt=SECURITY_PASSWORD_SALT,
+            salt=PWD_SALT,
             max_age=expiration
         )
     except:
@@ -43,7 +43,7 @@ async def confirm_token(token, expiration=3600):
 
 async def _create_msg(activation_url, email):
     message = MIMEMultipart("alternative")
-    message["From"] = MAIL_USERNAME
+    message["From"] = GMAIL_USER
     message["To"] = email
     message["Subject"] = 'Подтверждение регистрации в WeatherBot'
 
@@ -55,19 +55,19 @@ async def _create_msg(activation_url, email):
 
 async def _generate_confirmation_token(email, chat_id):
     serializer = URLSafeTimedSerializer(SECRET_KEY)
-    return serializer.dumps(f'{email}:{chat_id}', salt=SECURITY_PASSWORD_SALT)
+    return serializer.dumps(f'{email}:{chat_id}', salt=PWD_SALT)
 
 
 async def send_confirmation_mail(email, chat_id):
     token = await _generate_confirmation_token(email, chat_id)
-    activation_url = f'{BASE_URL}/confirm/{token}'
+    activation_url = f'{NGROK_URL}/confirm/{token}'
     message = await _create_msg(activation_url, email)
 
     await aiosmtplib.send(
         message, 
         hostname="smtp.gmail.com", 
         port=465,
-        username=MAIL_USERNAME,
-        password=MAIL_PASSWORD,
+        username=GMAIL_USER,
+        password=GMAIL_PWD,
         use_tls=True,
     )

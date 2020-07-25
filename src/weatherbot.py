@@ -13,16 +13,16 @@ from src import sendmail, steps
 from src.messages import *
 from src.models import common
 from src.aiotelegram import types as bot_types
-from src.secret import BASE_URL, DB_URL
+from src import NGROK_URL, MYSQL_URL
 
 from starlette.background import BackgroundTask
 
 
 app = Starlette()
 
-register_tortoise(app, db_url=DB_URL, modules={"models": ["src.models"]}, generate_schemas=True)
+register_tortoise(app, db_url=MYSQL_URL, modules={"models": ["src.models"]}, generate_schemas=True)
 
-bot.set_webhook(BASE_URL)
+bot.set_webhook(NGROK_URL)
 
 
 async def send_email_confirmation_success_msg(email, chat_id):

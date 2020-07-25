@@ -1,0 +1,1 @@
+0 0 * * * python /weatherbot/push_weather_notification.py

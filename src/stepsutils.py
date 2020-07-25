@@ -8,7 +8,7 @@ from src import bot
 from src.models import Weather, common
 from src.aiotelegram import types as bot_types
 
-from src.secret import OPENWEATHER_API_TOKEN
+from src import OPENWEATHER_API_TOKEN
 
 
 async def is_pwd_valid(password, hash):

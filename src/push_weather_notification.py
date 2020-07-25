@@ -9,10 +9,9 @@ import aiohttp
 from tortoise import Tortoise
 from tortoise.contrib.starlette import register_tortoise
 
-from src import bot
+from src import bot, NGROK_URL, MYSQL_URL
 from src import stepsutils
 from src.messages import *
-from src.secret import BASE_URL, DB_URL
 from src.models import User
 
 
@@ -31,7 +30,8 @@ async def notification_handler():
 
 
 async def main_loop():
-    await Tortoise.init(db_url=DB_URL, modules={"models": ["src.models"]})
+    await bot.set_webhook(NGROK_URL)
+    await Tortoise.init(db_url=MYSQL_URL, modules={"models": ["src.models"]})
     await notification_handler()
 
 
